@@ -1,4 +1,4 @@
-# termdash
+# 🔷 termdash
 
 A minimalist geometry dash clone on the terminal.
 
