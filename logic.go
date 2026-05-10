@@ -91,7 +91,14 @@ func updateLogic(gs *GameState, dt float64) {
 			continue
 		}
 
-		if checkCollision(playerX, hitboxY, gs.Player.Width, gs.Player.Height, obs.X, obs.Y, obs.Width, obs.Height) {
+		var isHit bool
+		if obs.Type == TypeItem {
+			isHit = checkCollision(playerX, hitboxY, gs.Player.Width, gs.Player.Height, obs.X - 1.5, obs.Y - 1.5, obs.Width + 3.0, obs.Height + 3.0)
+		} else {
+			isHit = checkCollision(playerX, hitboxY, gs.Player.Width, gs.Player.Height, obs.X, obs.Y, obs.Width, obs.Height)
+		}
+
+		if isHit {
 			if obs.Type == TypeItem {
 				gs.Score += 25
 				spawnItemExplosion(gs, obs.X, obs.Y)

@@ -119,7 +119,7 @@ func drawObstacles(gs *GameState) {
 			for dy := 0; dy < 3; dy++ {
 				for dx := 0; dx < drawW; dx++ {
 					drawX := x + dx
-					drawY := y + dy
+					drawY := y + dy + 1
 					if drawX >= 0 && drawX < gs.TermW && drawY >= 0 && drawY < gs.TermH {
 						if dy == 2 {
 							ttbox.SetCell(drawX, drawY, '▼', ColorSpike, ttbox.ColorDefault)
