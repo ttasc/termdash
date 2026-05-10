@@ -5,10 +5,9 @@ import (
 )
 
 const (
-	Gravity         = 320.0
+	Gravity         = 290.0
 	MaxSpeed        = 75.0
 	GroundOffset    = 3
-
 	ScoreMultiplier = 5.0
 	SpeedIncrement  = 1.5
 	SkyLimit        = 2.0
@@ -30,7 +29,6 @@ func updateLogic(gs *GameState, dt float64) {
 	}
 
 	gs.Distance += gs.Speed * dt
-
 	gs.Score = int(gs.Distance / ScoreMultiplier)
 
 	if gs.Speed < MaxSpeed {
@@ -62,6 +60,15 @@ func updateLogic(gs *GameState, dt float64) {
 		gs.Player.CrouchTimer -= dt
 	}
 
+	var hitboxY float64
+	if gs.Player.CrouchTimer > 0 && !gs.Player.IsJumping {
+		gs.Player.Height = 0.5
+		hitboxY = gs.Player.Y + 0.5
+	} else {
+		gs.Player.Height = 1.0
+		hitboxY = gs.Player.Y
+	}
+
 	if !gs.Player.IsJumping {
 		gs.ParticleTimer -= dt
 		if gs.ParticleTimer <= 0 {
@@ -84,14 +91,7 @@ func updateLogic(gs *GameState, dt float64) {
 			continue
 		}
 
-		py := gs.Player.Y
-		ph := 1.0
-		if gs.Player.CrouchTimer > 0 && !gs.Player.IsJumping {
-			py = gs.Player.Y + 0.5
-			ph = 0.5
-		}
-
-		if checkCollision(playerX, py, 1.0, ph, obs.X, obs.Y, obs.Width, obs.Height) {
+		if checkCollision(playerX, hitboxY, gs.Player.Width, gs.Player.Height, obs.X, obs.Y, obs.Width, obs.Height) {
 			if obs.Type == TypeItem {
 				gs.Score += 25
 				spawnItemExplosion(gs, obs.X, obs.Y)
@@ -108,30 +108,37 @@ func updateLogic(gs *GameState, dt float64) {
 }
 
 func spawnObstacle(gs *GameState, groundY float64) {
-	baseInterval := 1.2 - (gs.Speed/MaxSpeed)*0.6
-	gs.SpawnTimer = baseInterval + rand.Float64()*0.5
+	baseInterval := 1.5 - (gs.Speed/MaxSpeed)*0.7
 
 	r := rand.Float64()
 	obsType := TypeSpike
 	if r > 0.4 && r <= 0.6 {
 		obsType = TypeBlock
 	} else if r > 0.6 && r <= 0.8 {
-		obsType = TypeBird
+		obsType = CeilingTrap
 	} else if r > 0.8 {
 		obsType = TypeItem
 	}
 
 	var w, h, y float64
+	var extraDelay float64
+
 	switch obsType {
 	case TypeSpike:
 		w, h, y = 1.0, 1.0, groundY
+		extraDelay = 0.0
 	case TypeBlock:
 		w, h, y = 2.0, 2.0, groundY-1.0
-	case TypeBird:
-		w, h, y = 1.0, 0.5, groundY
+		extraDelay = 0.2
+	case CeilingTrap:
+		w, h, y = 3.0, 3.0, groundY-2.5
+		extraDelay = 0.2
 	case TypeItem:
 		w, h, y = 1.0, 1.0, groundY-2.5
+		extraDelay = -0.2
 	}
+
+	gs.SpawnTimer = baseInterval + rand.Float64()*0.4 + extraDelay
 
 	gs.Obstacles = append(gs.Obstacles, &Obstacle{
 		Type:   obsType,
@@ -156,7 +163,7 @@ func spawnTrailParticle(gs *GameState, x, y float64) {
 }
 
 func spawnDeathExplosion(gs *GameState, x, y float64) {
-	chars := []rune{'x', '*', '+', ':', '■', '.', '\''}
+	chars :=[]rune{'x', '*', '+', ':', '■', '.', '\''}
 	for i := 0; i < 25; i++ {
 		gs.Particles = append(gs.Particles, &Particle{
 			X:       x,

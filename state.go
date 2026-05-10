@@ -13,7 +13,7 @@ type ObstacleType int
 const (
 	TypeSpike ObstacleType = iota
 	TypeBlock
-	TypeBird
+	CeilingTrap
 	TypeItem
 )
 
@@ -22,6 +22,8 @@ type Player struct {
 	VelocityY   float64
 	IsJumping   bool
 	CrouchTimer float64
+	Width       float64
+	Height      float64
 }
 
 type Obstacle struct {
@@ -78,5 +80,5 @@ func (gs *GameState) Reset() {
 	gs.Speed = 25.0
 	gs.SpawnTimer = 1.5
 	gs.ParticleTimer = 0.0
-	gs.Player = &Player{VelocityY: 0, IsJumping: false, Y: 0}
+	gs.Player = &Player{VelocityY: 0, IsJumping: false, Y: 0, Width: 1.0, Height: 1.0}
 }

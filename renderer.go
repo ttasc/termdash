@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/ttasc/ttbox"
 )
 
@@ -67,9 +68,7 @@ func drawParticles(gs *GameState) {
 }
 
 func drawHeader(gs *GameState) {
-
 	speedMultiplier := gs.Speed / 25.0
-
 	header := fmt.Sprintf(" SCORE: %d | HI-SCORE: %d | SPEED: %.1fx ", gs.Score, gs.HighScore, speedMultiplier)
 	ttbox.DrawTextCenter(0, header, ColorText, ttbox.ColorDefault)
 }
@@ -81,10 +80,11 @@ func drawGround(gs *GameState) {
 		ttbox.SetCell(x, groundY, BaseLineChar, ColorGround, ttbox.ColorDefault)
 	}
 
-	for y := groundY + 1; y < gs.TermH-2; y++ {
-		for x := 0; x < gs.TermW; x++ {
+	offset := int(gs.Distance * 0.5)
 
-			if (x+y)%3 == 0 {
+	for y := groundY + 1; y < gs.TermH; y++ {
+		for x := 0; x < gs.TermW; x++ {
+			if (x+y+offset)%3 == 0 {
 				ttbox.SetCell(x, y, '.', ColorTextDim, ttbox.ColorDefault)
 			}
 		}
@@ -113,12 +113,22 @@ func drawObstacles(gs *GameState) {
 					}
 				}
 			}
-		case TypeBird:
-			birdChar := 'v'
-			if int(gs.Distance)%2 == 0 {
-				birdChar = '-'
+		case CeilingTrap:
+			drawW := int(obs.Width)
+
+			for dy := 0; dy < 3; dy++ {
+				for dx := 0; dx < drawW; dx++ {
+					drawX := x + dx
+					drawY := y + dy
+					if drawX >= 0 && drawX < gs.TermW && drawY >= 0 && drawY < gs.TermH {
+						if dy == 2 {
+							ttbox.SetCell(drawX, drawY, '▼', ColorSpike, ttbox.ColorDefault)
+						} else {
+							ttbox.SetCell(drawX, drawY, '█', ColorBlock, ttbox.ColorDefault)
+						}
+					}
+				}
 			}
-			ttbox.SetCell(x, y, birdChar, ColorSpike, ttbox.ColorDefault)
 		case TypeItem:
 			ttbox.SetCell(x, y, '◆', ColorAccent, ttbox.ColorDefault)
 		}
@@ -139,13 +149,13 @@ func drawPlayer(gs *GameState) {
 
 func drawControlsGuide(termH int) {
 	ttbox.DrawTextCenter(termH-2, " GEOMETRY DASH TERMINAL ", ColorAccent, ttbox.ColorDefault)
-	ttbox.DrawTextCenter(termH-1, " [SPACE/UP]: Jump | [DOWN/S]: Fast Fall |[ESC]: Pause ", ColorTextDim, ttbox.ColorDefault)
+	ttbox.DrawTextCenter(termH-1, "[SPACE/UP]: Jump | [DOWN/S]: Fast Fall |[ESC]: Pause ", ColorTextDim, ttbox.ColorDefault)
 }
 
 func drawGameBanner(gs *GameState) {
 	msgFg := ColorAccent
 	msg := " * PAUSED * "
-	subMsg := " [R] Restart[ESC] Resume   [Q] Quit "
+	subMsg := " [R] Restart   [ESC] Resume[Q] Quit "
 
 	if gs.Status == StatusLost {
 		msgFg = ColorLose
