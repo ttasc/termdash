@@ -159,9 +159,9 @@ func spawnObstacle(gs *GameState, groundY float64) {
 func spawnTrailParticle(gs *GameState, x, y float64) {
 	gs.Particles = append(gs.Particles, &Particle{
 		X:       x - 1,
-		Y:       y + 0.5,
+		Y:       y, // + 0.5,
 		VelX:    -gs.Speed * 0.8,
-		VelY:    -5.0 + rand.Float64()*10.0,
+		VelY:    0.0, // -5.0 + rand.Float64()*10.0,
 		Life:    0.3,
 		MaxLife: 0.3,
 		Char:    '.',
