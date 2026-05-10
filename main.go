@@ -12,7 +12,7 @@ func main() {
 	state := NewGameState()
 
 	if err := ttbox.Init(); err != nil {
-		fmt.Printf("Lỗi khởi tạo TUI: %v\n", err)
+		fmt.Printf("Error initializing TUI: %v\n", err)
 		return
 	}
 
